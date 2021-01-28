@@ -22,12 +22,6 @@ export class CloudinaryUploader implements ApolloServerFileUploads.IUploader {
 
   private createUploadStream(fileName: string, cb: Function): any {
     return cloudinary.v2.uploader.upload_stream(
-      /**
-       * We need a ts-ignore on the next line because for v2,
-       * the order of params for upload_stream is reversed.
-       */
-
-      //@ts-ignore
       { public_id: fileName },
       (error: any, file: any) => cb(error, file)
     );
