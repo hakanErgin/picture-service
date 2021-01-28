@@ -5,7 +5,7 @@ export namespace ApolloServerFileUploads {
     filename: string;
     mimetype: string;
     encoding: string;
-    stream?: ReadStream;
+    createReadStream?: ReadStream;
   };
 
   export type UploadedFileResponse = {

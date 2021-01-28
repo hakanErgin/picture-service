@@ -29,7 +29,7 @@ export class CloudinaryUploader implements ApolloServerFileUploads.IUploader {
 
       //@ts-ignore
       { public_id: fileName },
-      (error, file) => cb(error, file)
+      (error: any, file: any) => cb(error, file)
     );
   }
 
@@ -37,7 +37,8 @@ export class CloudinaryUploader implements ApolloServerFileUploads.IUploader {
     parent: any,
     { file }: { file: ApolloServerFileUploads.File }
   ): Promise<ApolloServerFileUploads.UploadedFileResponse> {
-    const { stream, filename, mimetype, encoding } = await file;
+    const { createReadStream, filename, mimetype, encoding } = await file;
+    console.log(file);
 
     return new Promise((resolve, reject) => {
       const uploadStream = this.createUploadStream(
@@ -53,7 +54,7 @@ export class CloudinaryUploader implements ApolloServerFileUploads.IUploader {
         }
       );
       // @ts-ignore
-      stream.pipe(uploadStream);
+      createReadStream(filename).pipe(uploadStream);
     });
   }
 
