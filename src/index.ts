@@ -27,7 +27,7 @@ const server = new ApolloServer({
 
     type Mutation {
       singleUpload(file: Upload!): UploadedFileResponse!
-      multipleUpload(files: [Upload!]!): UploadedFileResponse!
+      multipleUpload(files: [Upload!]!): [UploadedFileResponse!]!
     }
   `,
   resolvers: {

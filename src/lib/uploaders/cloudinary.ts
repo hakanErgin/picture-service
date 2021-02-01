@@ -38,7 +38,10 @@ export class CloudinaryUploader implements ApolloServerFileUploads.IUploader {
       const uploadStream = this.createUploadStream(
         filename,
         (error: any, result: any) => {
-          if (error) return reject(error);
+          if (error) {
+            console.log(error);
+            return reject(error);
+          }
           return resolve({
             filename,
             mimetype,
