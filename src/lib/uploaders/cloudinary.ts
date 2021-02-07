@@ -1,66 +1,49 @@
-import cloudinary from 'cloudinary';
+const cloudinary = require('cloudinary').v2;
 import { ApolloServerFileUploads } from '../index';
+import getCloudinaryUploaderOptions from '../googleSecret';
 
-type CloudinaryUploadConfig = {
-  cloudname: any;
-  apiKey: any;
-  apiSecret: any;
-};
+function createUploadStream(fileName: string, cb: Function): any {
+  return cloudinary.uploader.upload_stream(
+    { public_id: fileName },
+    (error: any, file: any) => cb(error, file)
+  );
+}
 
-export class CloudinaryUploader implements ApolloServerFileUploads.IUploader {
-  private config: CloudinaryUploadConfig;
+export async function singleFileUploadResolver(
+  parent: any,
+  { file }: { file: ApolloServerFileUploads.File }
+): Promise<ApolloServerFileUploads.UploadedFileResponse> {
+  const cloudinaryUploaderOptions = await getCloudinaryUploaderOptions();
+  cloudinary.config(cloudinaryUploaderOptions);
+  const { createReadStream, filename, mimetype, encoding } = await file;
+  console.log(file);
 
-  constructor(config: CloudinaryUploadConfig) {
-    this.config = config;
-
-    cloudinary.v2.config({
-      cloud_name: config.cloudname,
-      api_key: config.apiKey,
-      api_secret: config.apiSecret,
-    });
-  }
-
-  private createUploadStream(fileName: string, cb: Function): any {
-    return cloudinary.v2.uploader.upload_stream(
-      { public_id: fileName },
-      (error: any, file: any) => cb(error, file)
-    );
-  }
-
-  async singleFileUploadResolver(
-    parent: any,
-    { file }: { file: ApolloServerFileUploads.File }
-  ): Promise<ApolloServerFileUploads.UploadedFileResponse> {
-    const { createReadStream, filename, mimetype, encoding } = await file;
-    console.log(file);
-
-    return new Promise((resolve, reject) => {
-      const uploadStream = this.createUploadStream(
-        filename,
-        (error: any, result: any) => {
-          if (error) {
-            console.log(error);
-            return reject(error);
-          }
-          return resolve({
-            filename,
-            mimetype,
-            encoding,
-            url: result.url,
-          } as ApolloServerFileUploads.UploadedFileResponse);
+  return new Promise((resolve, reject) => {
+    const uploadStream = createUploadStream(
+      filename,
+      (error: any, result: any) => {
+        if (error) {
+          console.log(error);
+          return reject(error);
         }
-      );
-      // @ts-ignore
-      createReadStream(filename).pipe(uploadStream);
-    });
-  }
-
-  async multipleUploadsResolver(
-    parent: any,
-    { files }: { files: ApolloServerFileUploads.File[] }
-  ): Promise<ApolloServerFileUploads.UploadedFileResponse[]> {
-    return Promise.all(
-      files.map((f) => this.singleFileUploadResolver(null, { file: f }))
+        return resolve({
+          filename,
+          mimetype,
+          encoding,
+          url: result.url,
+        } as ApolloServerFileUploads.UploadedFileResponse);
+      }
     );
-  }
+    // @ts-ignore
+    createReadStream(filename).pipe(uploadStream);
+  });
+}
+
+export async function multipleUploadsResolver(
+  parent: any,
+  { files }: { files: ApolloServerFileUploads.File[] }
+): Promise<ApolloServerFileUploads.UploadedFileResponse[]> {
+  return Promise.all(
+    files.map((f) => singleFileUploadResolver(null, { file: f }))
+  );
 }

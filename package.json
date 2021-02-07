@@ -14,6 +14,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@google-cloud/secret-manager": "^3.4.0",
     "apollo-server": "^2.19.2",
     "cloudinary": "^1.23.0",
     "dotenv": "^8.2.0",
