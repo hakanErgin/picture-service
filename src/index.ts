@@ -27,9 +27,6 @@ const server = new ApolloServer({
     }
   `,
   resolvers: {
-    Query: {
-      hello: () => 'Hey!',
-    },
     Mutation: {
       singleUpload: singleFileUploadResolver,
       multipleUpload: multipleUploadsResolver,

@@ -16,7 +16,6 @@ export async function singleFileUploadResolver(
   const cloudinaryUploaderOptions = await getCloudinaryUploaderOptions();
   cloudinary.config(cloudinaryUploaderOptions);
   const { createReadStream, filename, mimetype, encoding } = await file;
-  console.log(file);
 
   return new Promise((resolve, reject) => {
     const uploadStream = createUploadStream(
